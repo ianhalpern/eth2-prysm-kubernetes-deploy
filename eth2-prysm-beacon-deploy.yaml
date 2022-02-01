@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eth2-prysm-beacon
+  namespace: default
+  labels:
+    app: eth2-prysm-beacon
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: eth2-prysm-beacon
+  template:
+    metadata:
+      labels:
+        app: eth2-prysm-beacon
+    spec:
+      containers:
+      - name: eth2-prysm-beacon
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+        args:
+        - --datadir
+        - "/var/lib/prysm/beacon-node"
+        - --rpc-host=0.0.0.0
+        - --accept-terms-of-use
+        - --p2p-host-ip=$(P2P_HOST_IP)
+        - --p2p-tcp-port=30876
+        - --http-web3provider=$(HTTP_WEB3PROVIDER)
+        env:
+        - name: HTTP_WEB3PROVIDER
+          valueFrom:
+            secretKeyRef:
+              name: eth2-prysm-beacon-env
+              key: HTTP_WEB3PROVIDER
+        - name: P2P_HOST_IP
+          valueFrom:
+            secretKeyRef:
+              name: eth2-prysm-beacon-env
+              key: P2P_HOST_IP
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: "/var/lib/prysm/beacon-node"
+          name: eth2-prysm-beacon-data
+      volumes:
+      - name: eth2-prysm-beacon-data
+        persistentVolumeClaim:
+          claimName: eth2-prysm-beacon-data-claim
+

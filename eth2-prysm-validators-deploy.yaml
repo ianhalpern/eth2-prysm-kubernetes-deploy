@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eth2-prysm-validators
+  namespace: default
+  labels:
+    app: eth2-prysm-validators
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: eth2-prysm-validators
+  template:
+    metadata:
+      labels:
+        app: eth2-prysm-validators
+    spec:
+      containers:
+      - name: eth2-prysm-validators
+        image: gcr.io/prysmaticlabs/prysm/validator:latest
+        args:
+        - --wallet-dir=/var/lib/prysm/validators/prysm-wallet-v2
+        - --wallet-password-file=/var/lib/prysm/secrets/wallet-password.txt
+        - --beacon-rpc-provider=eth2-prysm-beacon-svc:4000
+        - --accept-terms-of-use
+        - --verbosity=debug
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: eth2-prysm-validators-data
+          mountPath: "/var/lib/prysm/validators"
+        - name: eth2-prysm-validators-secrets
+          mountPath: /var/lib/prysm/secrets
+          readOnly: true
+      volumes:
+      - name: eth2-prysm-validators-data
+        persistentVolumeClaim:
+          claimName: eth2-prysm-validators-data-claim
+      - name: eth2-prysm-validators-secrets
+        secret:
+          secretName: eth2-prysm-validators-secrets
+
+
