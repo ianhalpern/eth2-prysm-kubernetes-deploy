@@ -26,7 +26,8 @@ spec:
         - --accept-terms-of-use
         - --p2p-host-ip=$(P2P_HOST_IP)
         - --p2p-tcp-port=30876
-        - --http-web3provider=$(HTTP_WEB3PROVIDER)
+        - --execution-endpoint=http://eth2-geth-execution-svc:8551
+        - --jwt-secret=/secrets/jwt.hex
         env:
         - name: HTTP_WEB3PROVIDER
           valueFrom:
@@ -42,8 +43,14 @@ spec:
         volumeMounts:
         - mountPath: "/var/lib/prysm/beacon-node"
           name: eth2-prysm-beacon-data
+        - name: eth2-authrpc-jwtsecret
+          mountPath: /secrets
+          readOnly: true
       volumes:
       - name: eth2-prysm-beacon-data
         persistentVolumeClaim:
           claimName: eth2-prysm-beacon-data-claim
+      - name: eth2-authrpc-jwtsecret
+        secret:
+          secretName: eth2-authrpc-jwtsecret
 

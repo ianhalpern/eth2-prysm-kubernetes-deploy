@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eth2-geth-execution
+  namespace: default
+  labels:
+    app: eth2-geth-execution
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: eth2-geth-execution
+  template:
+    metadata:
+      labels:
+        app: eth2-geth-execution
+    spec:
+      containers:
+      - name: eth2-geth-execution
+        image: ethereum/client-go:latest
+        args:
+        - --http
+        - --http.addr=0.0.0.0
+        - --http.api=eth,net,engine,admin
+        - --http.corsdomain="*"
+        - --http.vhosts=eth2-geth-execution-svc
+        - --authrpc.jwtsecret=/secrets/jwt.hex
+        - --authrpc.addr=0.0.0.0
+        - --authrpc.vhosts=eth2-geth-execution-svc
+        - --datadir=/data
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8551
+        volumeMounts:
+        - name: eth2-authrpc-jwtsecret
+          mountPath: /secrets
+          readOnly: true
+        - mountPath: "/data"
+          name: eth2-geth-execution-data
+      volumes:
+      - name: eth2-authrpc-jwtsecret
+        secret:
+          secretName: eth2-authrpc-jwtsecret
+      - name: eth2-geth-execution-data
+        persistentVolumeClaim:
+          claimName: eth2-geth-execution-data-claim
+

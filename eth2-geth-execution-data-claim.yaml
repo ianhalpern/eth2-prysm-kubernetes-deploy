@@ -1,10 +1,10 @@
 apiVersion: "v1"
 kind: "PersistentVolumeClaim"
 metadata:
-  name: "eth2-prysm-beacon-data-claim"
+  name: "eth2-geth-execution-data-claim"
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: "500Gi"
+      storage: "3000Gi"
